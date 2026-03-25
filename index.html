@@ -1,89 +1,95 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voucher WiFi Majalengka</title>
-  <style>
-    body { font-family: Arial; background:#f5f5f5; margin:0; }
-    header { background:#0d6efd; color:white; padding:15px; text-align:center; }
-    .container { padding:20px; }
-    .card {
-      background:white; padding:15px; margin-bottom:15px;
-      border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);
-      cursor:pointer;
-    }
-    .hidden { display:none; }
-    button {
-      background:#25D366; color:white; border:none;
-      padding:10px 15px; border-radius:5px; cursor:pointer;
-      margin-top:10px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voucher WiFi Majalengka</title>
+<style>
+body { font-family: Arial; background:#f5f5f5; margin:0; }
+header { background:#0d6efd; color:white; padding:15px; text-align:center; }
+.container { padding:20px; }
+.card { background:white; padding:15px; margin-bottom:10px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer; }
+button { background:#25D366; color:white; border:none; padding:8px 12px; border-radius:5px; margin-top:5px; }
+</style>
 </head>
 <body>
 
 <header>
-  <h2>Voucher WiFi Majalengka</h2>
-  <p>Pilih Kecamatan → Desa → Paket</p>
-  <p>Pembayaran via DANA: 082319264646</p>
+<h2>Voucher WiFi Majalengka</h2>
+<p>Pilih Kecamatan → Desa → Paket</p>
+<p>Pembayaran DANA: 082319264646</p>
 </header>
 
 <div class="container">
-
-  <!-- KECAMATAN -->
-  <div class="card" onclick="showDesa('maja')">
-    <h3>Kecamatan Maja</h3>
-  </div>
-
-  <!-- DESA -->
-  <div id="maja" class="hidden">
-
-    <div class="card" onclick="showPaket('maja1')">
-      <h4>Desa Maja Utara</h4>
-    </div>
-
-    <div id="maja1" class="hidden">
-      <p>2 Jam - Rp2.000</p>
-      <button onclick="order('Maja Utara','2 Jam')">Beli</button>
-
-      <p>1 Hari - Rp5.000</p>
-      <button onclick="order('Maja Utara','1 Hari')">Beli</button>
-    </div>
-
-    <div class="card" onclick="showPaket('maja2')">
-      <h4>Desa Maja Selatan</h4>
-    </div>
-
-    <div id="maja2" class="hidden">
-      <p>2 Jam - Rp2.000</p>
-      <button onclick="order('Maja Selatan','2 Jam')">Beli</button>
-
-      <p>1 Hari - Rp5.000</p>
-      <button onclick="order('Maja Selatan','1 Hari')">Beli</button>
-    </div>
-
-  </div>
-
+<div id="kecamatan"></div>
+<div id="desa"></div>
+<div id="paket"></div>
 </div>
 
 <script>
-function showDesa(id) {
-  let el = document.getElementById(id);
-  el.classList.toggle('hidden');
+
+const data = {
+  "Maja": ["Maja Utara","Maja Selatan","Cieurih","Cipasung"],
+  "Kadipaten": ["Kadipaten","Heuleut","Cipaku","Pagandon"],
+  "Jatiwangi": ["Jatiwangi","Burujul","Andir","Sutawangi"],
+  "Majalengka": ["Tarikolot","Cigasong","Munjul","Babakan Jawa"],
+  "Rajagaluh": ["Rajagaluh","Leuwilaja","Sukaraharja","Sindang"],
+  "Ligung": ["Ligung","Buntu","Cibogor","Ciborelang"],
+  "Sumberjaya": ["Sumberjaya","Paningkiran","Banjaran","Pasiripis"],
+  "Talaga": ["Talaga","Argapura","Cikeusik","Campaga"]
+};
+
+const harga = [
+  {nama:"2 Jam", harga:"Rp2.000"},
+  {nama:"12 Jam", harga:"Rp5.000"},
+  {nama:"24 Jam", harga:"Rp7.000"}
+];
+
+const kecDiv = document.getElementById("kecamatan");
+const desaDiv = document.getElementById("desa");
+const paketDiv = document.getElementById("paket");
+
+for (let kec in data) {
+  let el = document.createElement("div");
+  el.className = "card";
+  el.innerHTML = `<h3>${kec}</h3>`;
+  el.onclick = () => showDesa(kec);
+  kecDiv.appendChild(el);
 }
 
-function showPaket(id) {
-  let el = document.getElementById(id);
-  el.classList.toggle('hidden');
+function showDesa(kec) {
+  desaDiv.innerHTML = "";
+  paketDiv.innerHTML = "";
+
+  data[kec].forEach(desa => {
+    let el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `<h4>${desa}</h4>`;
+    el.onclick = () => showPaket(desa);
+    desaDiv.appendChild(el);
+  });
+}
+
+function showPaket(desa) {
+  paketDiv.innerHTML = "";
+
+  harga.forEach(p => {
+    paketDiv.innerHTML += `
+      <div class='card'>
+        <p>${p.nama} - ${p.harga}</p>
+        <button onclick="order('${desa}','${p.nama}')">Beli</button>
+      </div>
+    `;
+  });
 }
 
 function order(lokasi, paket) {
-  let nomor = '6282319264646'; // Nomor WA & DANA
-  let pesan = `Halo, saya mau beli voucher WiFi\nLokasi: ${lokasi}\nPaket: ${paket}`;
+  let nomor = '6282319264646';
+  let pesan = `Halo, saya mau beli voucher WiFi\nLokasi: ${lokasi}\nPaket: ${paket}\nPembayaran ke DANA: 082319264646`;
   let url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
   window.open(url, '_blank');
 }
+
 </script>
 
 </body>
