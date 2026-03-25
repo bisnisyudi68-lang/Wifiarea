@@ -9,7 +9,8 @@ body { font-family: Arial; background:#f5f5f5; margin:0; }
 header { background:#0d6efd; color:white; padding:15px; text-align:center; }
 .container { padding:20px; }
 .card { background:white; padding:15px; margin-bottom:10px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer; }
-button { background:#25D366; color:white; border:none; padding:8px 12px; border-radius:5px; margin-top:5px; }
+button { background:#25D366; color:white; border:none; padding:10px; border-radius:5px; margin-top:5px; width:100%; }
+.back { background:#6c757d; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -21,22 +22,16 @@ button { background:#25D366; color:white; border:none; padding:8px 12px; border-
 </header>
 
 <div class="container">
-<div id="kecamatan"></div>
-<div id="desa"></div>
-<div id="paket"></div>
+<div id="content"></div>
 </div>
 
 <script>
 
 const data = {
-  "Maja": ["Maja Utara","Maja Selatan","Cieurih","Cipasung"],
-  "Kadipaten": ["Kadipaten","Heuleut","Cipaku","Pagandon"],
-  "Jatiwangi": ["Jatiwangi","Burujul","Andir","Sutawangi"],
-  "Majalengka": ["Tarikolot","Cigasong","Munjul","Babakan Jawa"],
-  "Rajagaluh": ["Rajagaluh","Leuwilaja","Sukaraharja","Sindang"],
-  "Ligung": ["Ligung","Buntu","Cibogor","Ciborelang"],
-  "Sumberjaya": ["Sumberjaya","Paningkiran","Banjaran","Pasiripis"],
-  "Talaga": ["Talaga","Argapura","Cikeusik","Campaga"]
+  "Maja": ["Maja Utara","Maja Selatan"],
+  "Kadipaten": ["Kadipaten","Heuleut"],
+  "Jatiwangi": ["Jatiwangi","Burujul"],
+  "Majalengka": ["Cigasong","Tarikolot"]
 };
 
 const harga = [
@@ -45,41 +40,46 @@ const harga = [
   {nama:"24 Jam", harga:"Rp7.000"}
 ];
 
-const kecDiv = document.getElementById("kecamatan");
-const desaDiv = document.getElementById("desa");
-const paketDiv = document.getElementById("paket");
+const content = document.getElementById("content");
 
-for (let kec in data) {
-  let el = document.createElement("div");
-  el.className = "card";
-  el.innerHTML = `<h3>${kec}</h3>`;
-  el.onclick = () => showDesa(kec);
-  kecDiv.appendChild(el);
+// tampil kecamatan awal
+function showKecamatan() {
+  content.innerHTML = "";
+  for (let kec in data) {
+    let el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `<h3>${kec}</h3>`;
+    el.onclick = () => showDesa(kec);
+    content.appendChild(el);
+  }
 }
 
+// tampil desa
 function showDesa(kec) {
-  desaDiv.innerHTML = "";
-  paketDiv.innerHTML = "";
+  content.innerHTML = `<button class='back' onclick='showKecamatan()'>← Kembali</button>`;
 
   data[kec].forEach(desa => {
     let el = document.createElement("div");
     el.className = "card";
     el.innerHTML = `<h4>${desa}</h4>`;
     el.onclick = () => showPaket(desa);
-    desaDiv.appendChild(el);
+    content.appendChild(el);
   });
 }
 
+// tampil paket
 function showPaket(desa) {
-  paketDiv.innerHTML = "";
+  content.innerHTML = `<button class='back' onclick='showKecamatan()'>← Kembali</button>`;
 
   harga.forEach(p => {
-    paketDiv.innerHTML += `
-      <div class='card'>
-        <p>${p.nama} - ${p.harga}</p>
-        <button onclick="order('${desa}','${p.nama}')">Beli</button>
-      </div>
+    let el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <p><b>${desa}</b></p>
+      <p>${p.nama} - ${p.harga}</p>
+      <button onclick="order('${desa}','${p.nama}')">Beli</button>
     `;
+    content.appendChild(el);
   });
 }
 
@@ -89,6 +89,9 @@ function order(lokasi, paket) {
   let url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
   window.open(url, '_blank');
 }
+
+// start
+showKecamatan();
 
 </script>
 
