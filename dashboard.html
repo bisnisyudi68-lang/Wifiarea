@@ -61,12 +61,12 @@ header{
 }
 
 .judul{
+  font-size:15px;
   color:#666;
-  font-size:14px;
 }
 
 .total{
-  font-size:24px;
+  font-size:28px;
   font-weight:bold;
   margin-top:5px;
 }
@@ -150,13 +150,13 @@ function showTab(id){
 
   document
     .querySelectorAll(".box")
-    .forEach(box => {
+    .forEach(box=>{
       box.classList.remove("active");
     });
 
   document
     .querySelectorAll(".tabs button")
-    .forEach(btn => {
+    .forEach(btn=>{
       btn.classList.remove("active");
     });
 
@@ -174,7 +174,7 @@ function showTab(id){
 }
 
 /* =========================
-   LINK CSV FIX RUMUS1
+   LINK CSV
 ========================= */
 
 const CSV_URL =
@@ -186,9 +186,9 @@ const CSV_URL =
 
 fetch(CSV_URL)
 
-.then(res => res.text())
+.then(res=>res.text())
 
-.then(csv => {
+.then(csv=>{
 
   const rows =
     csv.trim().split("\n").slice(1);
@@ -197,7 +197,7 @@ fetch(CSV_URL)
   let bulanan = {};
   let tahunan = {};
 
-  rows.forEach(row => {
+  rows.forEach(row=>{
 
     const c =
       row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
@@ -205,7 +205,7 @@ fetch(CSV_URL)
     if(!c) return;
 
     /* =========================
-       AMBIL DATA
+       KOLOM
     ========================= */
 
     const tanggal =
@@ -222,36 +222,16 @@ fetch(CSV_URL)
       (c[3] || "")
       .replace(/"/g,"")
       .trim();
-const parts = tanggal.split("/");
 
-if(parts.length < 3){
-  return;
-}
+    const totalText =
+      (c[11] || "")
+      .replace(/"/g,"")
+      .replace(/\./g,"")
+      .replace(/,/g,"")
+      .trim();
 
-const urutTanggal =
-  new Date(
-    parts[2],
-    parts[1]-1,
-    parts[0]
-  );
-
-    /* =========================
-   TOTAL HARGA
-========================= */
-
-const totalText =
-  (c[11] || "")
-  .replace(/"/g,"")
-  .replace(/\./g,"")
-  .replace(/,/g,"")
-  .trim();
-
-const total =
-  parseInt(totalText) || 0;
-
-    /* =========================
-       LEWATI DATA ERROR
-    ========================= */
+    const total =
+      parseInt(totalText) || 0;
 
     if(
       !tanggal ||
@@ -263,17 +243,38 @@ const total =
     }
 
     /* =========================
+       FORMAT TANGGAL
+    ========================= */
+
+    const parts =
+      tanggal.split("/");
+
+    if(parts.length < 3){
+      return;
+    }
+
+    const urutTanggal =
+      new Date(
+        parts[2],
+        parts[1]-1,
+        parts[0]
+      );
+
+    /* =========================
        HARIAN
     ========================= */
 
     if(!harian[tanggal]){
-  harian[tanggal] = {
-    total:0,
-    urut:urutTanggal
-  };
-}
 
-harian[tanggal].total += total;
+      harian[tanggal] = {
+        total:0,
+        urut:urutTanggal
+      };
+
+    }
+
+    harian[tanggal].total += total;
+
     /* =========================
        BULANAN
     ========================= */
@@ -282,10 +283,15 @@ harian[tanggal].total += total;
       bulan + " " + tahun;
 
     if(!bulanan[namaBulan]){
-      bulanan[namaBulan] = 0;
+
+      bulanan[namaBulan] = {
+        total:0,
+        urut:urutTanggal
+      };
+
     }
 
-    bulanan[namaBulan] += total;
+    bulanan[namaBulan].total += total;
 
     /* =========================
        TAHUNAN
@@ -307,7 +313,11 @@ harian[tanggal].total += total;
 
   Object.keys(harian)
 
-  .forEach(tgl => {
+  .sort((a,b)=>{
+    return harian[a].urut - harian[b].urut;
+  })
+
+  .forEach(tgl=>{
 
     hHtml += `
 
@@ -318,12 +328,13 @@ harian[tanggal].total += total;
         </div>
 
         <div class="total">
-          Rp ${harian[tgl].toLocaleString("id-ID")}
+          Rp ${harian[tgl].total.toLocaleString("id-ID")}
         </div>
 
       </div>
 
     `;
+
   });
 
   document
@@ -339,7 +350,11 @@ harian[tanggal].total += total;
 
   Object.keys(bulanan)
 
-  .forEach(bln => {
+  .sort((a,b)=>{
+    return bulanan[a].urut - bulanan[b].urut;
+  })
+
+  .forEach(bln=>{
 
     bHtml += `
 
@@ -350,12 +365,13 @@ harian[tanggal].total += total;
         </div>
 
         <div class="total">
-          Rp ${bulanan[bln].toLocaleString("id-ID")}
+          Rp ${bulanan[bln].total.toLocaleString("id-ID")}
         </div>
 
       </div>
 
     `;
+
   });
 
   document
@@ -371,7 +387,7 @@ harian[tanggal].total += total;
 
   Object.keys(tahunan)
 
-  .forEach(thn => {
+  .forEach(thn=>{
 
     tHtml += `
 
@@ -388,6 +404,7 @@ harian[tanggal].total += total;
       </div>
 
     `;
+
   });
 
   document
@@ -397,7 +414,7 @@ harian[tanggal].total += total;
 
 })
 
-.catch(error => {
+.catch(error=>{
 
   console.log(error);
 
