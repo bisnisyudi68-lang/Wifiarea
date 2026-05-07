@@ -141,10 +141,6 @@ header{
 
 <script>
 
-/* =========================
-   TAB
-========================= */
-
 function showTab(id){
 
   document
@@ -169,14 +165,11 @@ function showTab(id){
 }
 
 /* =========================
-   LINK CSV SHEET DATA
+   CSV FIX RUMUS1
 ========================= */
 
 const CSV_URL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?output=csv";
-/* =========================
-   FETCH DATA
-========================= */
 
 fetch(CSV_URL)
 
@@ -199,54 +192,51 @@ fetch(CSV_URL)
     if(!c) return;
 
     /* =========================
-       AMBIL DATA
+       FIX RUMUS1
     ========================= */
 
-    const timestamp =
+    const tanggal =
       (c[0] || "")
       .replace(/"/g,"")
       .trim();
 
-    const hargaText =
-      (c[5] || "")
+    const bulan =
+      (c[2] || "")
       .replace(/"/g,"")
+      .trim();
+
+    const tahun =
+      (c[3] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    /* =========================
+       TOTAL HARGA = KOLOM L
+       INDEX 11
+    ========================= */
+
+    const totalText =
+      (c[11] || "")
+      .replace(/"/g,"")
+      .replace(/\./g,"")
       .replace(/[^\d]/g,"");
 
     const total =
-      parseInt(hargaText) || 0;
+      parseInt(totalText) || 0;
 
-    /* =========================
-       LEWATI DATA ERROR
-    ========================= */
+    /* LEWATI DATA ERROR */
 
     if(
-      timestamp.includes("#REF!")
+      tanggal.includes("#REF!")
+      ||
+      bulan.includes("#REF!")
+      ||
+      tahun.includes("#REF!")
       ||
       total <= 0
     ){
       return;
     }
-
-    /* =========================
-       FORMAT TANGGAL
-    ========================= */
-
-    const date =
-      new Date(timestamp);
-
-    if(isNaN(date)) return;
-
-    const tanggal =
-      date.toLocaleDateString("id-ID");
-
-    const bulan =
-      date.toLocaleString("id-ID",{
-        month:"long",
-        year:"numeric"
-      });
-
-    const tahun =
-      date.getFullYear().toString();
 
     /* =========================
        HARIAN
@@ -262,11 +252,14 @@ fetch(CSV_URL)
        BULANAN
     ========================= */
 
-    if(!bulanan[bulan]){
-      bulanan[bulan] = 0;
+    const namaBulan =
+      bulan + " " + tahun;
+
+    if(!bulanan[namaBulan]){
+      bulanan[namaBulan] = 0;
     }
 
-    bulanan[bulan] += total;
+    bulanan[namaBulan] += total;
 
     /* =========================
        TAHUNAN
@@ -281,7 +274,7 @@ fetch(CSV_URL)
   });
 
   /* =========================
-     TAMPILKAN HARIAN
+     HARIAN
   ========================= */
 
   let hHtml = "";
@@ -305,15 +298,15 @@ fetch(CSV_URL)
     </div>
 
     `;
-
   });
 
   document
     .getElementById("harianList")
-    .innerHTML = hHtml || "Tidak ada data";
+    .innerHTML =
+      hHtml || "Tidak ada data";
 
   /* =========================
-     TAMPILKAN BULANAN
+     BULANAN
   ========================= */
 
   let bHtml = "";
@@ -337,15 +330,15 @@ fetch(CSV_URL)
     </div>
 
     `;
-
   });
 
   document
     .getElementById("bulananList")
-    .innerHTML = bHtml || "Tidak ada data";
+    .innerHTML =
+      bHtml || "Tidak ada data";
 
   /* =========================
-     TAMPILKAN TAHUNAN
+     TAHUNAN
   ========================= */
 
   let tHtml = "";
@@ -369,12 +362,12 @@ fetch(CSV_URL)
     </div>
 
     `;
-
   });
 
   document
     .getElementById("tahunanList")
-    .innerHTML = tHtml || "Tidak ada data";
+    .innerHTML =
+      tHtml || "Tidak ada data";
 
 })
 
