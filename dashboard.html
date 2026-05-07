@@ -31,7 +31,7 @@ header{
   flex:1;
   border:none;
   padding:12px;
-  border-radius:8px;
+  border-radius:10px;
   background:white;
   color:#0d6efd;
   font-size:16px;
@@ -48,7 +48,7 @@ header{
   background:white;
   margin:10px;
   padding:15px;
-  border-radius:10px;
+  border-radius:12px;
 }
 
 .box.active{
@@ -60,14 +60,15 @@ header{
   border-bottom:1px solid #ddd;
 }
 
-.tanggal{
-  font-size:14px;
+.judul{
   color:#666;
+  font-size:14px;
 }
 
 .total{
-  font-size:20px;
+  font-size:24px;
   font-weight:bold;
+  margin-top:5px;
 }
 
 </style>
@@ -77,7 +78,7 @@ header{
 
 <header>
   <h2>📊 Dashboard Konter</h2>
-  <small>Data dari Sheet DATA</small>
+  <small>Data dari Sheet FIX RUMUS1</small>
 </header>
 
 <div class="tabs">
@@ -141,15 +142,23 @@ header{
 
 <script>
 
+/* =========================
+   TAB
+========================= */
+
 function showTab(id){
 
   document
     .querySelectorAll(".box")
-    .forEach(el => el.classList.remove("active"));
+    .forEach(box => {
+      box.classList.remove("active");
+    });
 
   document
     .querySelectorAll(".tabs button")
-    .forEach(el => el.classList.remove("active"));
+    .forEach(btn => {
+      btn.classList.remove("active");
+    });
 
   document
     .getElementById(id)
@@ -165,11 +174,15 @@ function showTab(id){
 }
 
 /* =========================
-   CSV FIX RUMUS1
+   LINK CSV FIX RUMUS1
 ========================= */
 
 const CSV_URL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=716772016&single=true&output=csv";
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=1848020631&single=true&output=csv";
+
+/* =========================
+   FETCH DATA
+========================= */
 
 fetch(CSV_URL)
 
@@ -192,7 +205,7 @@ fetch(CSV_URL)
     if(!c) return;
 
     /* =========================
-       FIX RUMUS1
+       AMBIL DATA
     ========================= */
 
     const tanggal =
@@ -211,8 +224,8 @@ fetch(CSV_URL)
       .trim();
 
     /* =========================
-       TOTAL HARGA = KOLOM L
-       INDEX 11
+       TOTAL HARGA
+       KOLOM L = INDEX 11
     ========================= */
 
     const totalText =
@@ -224,15 +237,14 @@ fetch(CSV_URL)
     const total =
       parseInt(totalText) || 0;
 
-    /* LEWATI DATA ERROR */
+    /* =========================
+       LEWATI DATA ERROR
+    ========================= */
 
     if(
-      tanggal.includes("#REF!")
-      ||
-      bulan.includes("#REF!")
-      ||
-      tahun.includes("#REF!")
-      ||
+      !tanggal ||
+      !bulan ||
+      !tahun ||
       total <= 0
     ){
       return;
@@ -274,7 +286,7 @@ fetch(CSV_URL)
   });
 
   /* =========================
-     HARIAN
+     TAMPILKAN HARIAN
   ========================= */
 
   let hHtml = "";
@@ -285,17 +297,17 @@ fetch(CSV_URL)
 
     hHtml += `
 
-    <div class="item">
+      <div class="item">
 
-      <div class="tanggal">
-        ${tgl}
+        <div class="judul">
+          ${tgl}
+        </div>
+
+        <div class="total">
+          Rp ${harian[tgl].toLocaleString("id-ID")}
+        </div>
+
       </div>
-
-      <div class="total">
-        Rp ${harian[tgl].toLocaleString("id-ID")}
-      </div>
-
-    </div>
 
     `;
   });
@@ -306,7 +318,7 @@ fetch(CSV_URL)
       hHtml || "Tidak ada data";
 
   /* =========================
-     BULANAN
+     TAMPILKAN BULANAN
   ========================= */
 
   let bHtml = "";
@@ -317,17 +329,17 @@ fetch(CSV_URL)
 
     bHtml += `
 
-    <div class="item">
+      <div class="item">
 
-      <div class="tanggal">
-        ${bln}
+        <div class="judul">
+          ${bln}
+        </div>
+
+        <div class="total">
+          Rp ${bulanan[bln].toLocaleString("id-ID")}
+        </div>
+
       </div>
-
-      <div class="total">
-        Rp ${bulanan[bln].toLocaleString("id-ID")}
-      </div>
-
-    </div>
 
     `;
   });
@@ -338,7 +350,7 @@ fetch(CSV_URL)
       bHtml || "Tidak ada data";
 
   /* =========================
-     TAHUNAN
+     TAMPILKAN TAHUNAN
   ========================= */
 
   let tHtml = "";
@@ -349,17 +361,17 @@ fetch(CSV_URL)
 
     tHtml += `
 
-    <div class="item">
+      <div class="item">
 
-      <div class="tanggal">
-        ${thn}
+        <div class="judul">
+          ${thn}
+        </div>
+
+        <div class="total">
+          Rp ${tahunan[thn].toLocaleString("id-ID")}
+        </div>
+
       </div>
-
-      <div class="total">
-        Rp ${tahunan[thn].toLocaleString("id-ID")}
-      </div>
-
-    </div>
 
     `;
   });
