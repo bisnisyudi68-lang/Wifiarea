@@ -222,6 +222,18 @@ fetch(CSV_URL)
       (c[3] || "")
       .replace(/"/g,"")
       .trim();
+const parts = tanggal.split("/");
+
+if(parts.length < 3){
+  return;
+}
+
+const urutTanggal =
+  new Date(
+    parts[2],
+    parts[1]-1,
+    parts[0]
+  );
 
     /* =========================
    TOTAL HARGA
@@ -230,14 +242,12 @@ fetch(CSV_URL)
 const totalText =
   (c[11] || "")
   .replace(/"/g,"")
+  .replace(/\./g,"")
+  .replace(/,/g,"")
   .trim();
 
 const total =
-  Number(totalText);
-
-if(isNaN(total) || total <= 0){
-  return;
-}
+  parseInt(totalText) || 0;
 
     /* =========================
        LEWATI DATA ERROR
@@ -257,11 +267,13 @@ if(isNaN(total) || total <= 0){
     ========================= */
 
     if(!harian[tanggal]){
-      harian[tanggal] = 0;
-    }
+  harian[tanggal] = {
+    total:0,
+    urut:urutTanggal
+  };
+}
 
-    harian[tanggal] += total;
-
+harian[tanggal].total += total;
     /* =========================
        BULANAN
     ========================= */
