@@ -224,18 +224,20 @@ fetch(CSV_URL)
       .trim();
 
     /* =========================
-       TOTAL HARGA
-       KOLOM L = INDEX 11
-    ========================= */
+   TOTAL HARGA
+========================= */
 
-    const totalText =
-      (c[11] || "")
-      .replace(/"/g,"")
-      .replace(/\./g,"")
-      .replace(/[^\d]/g,"");
+const totalText =
+  (c[11] || "")
+  .replace(/"/g,"")
+  .trim();
 
-    const total =
-      parseInt(totalText) || 0;
+const total =
+  Number(totalText);
+
+if(isNaN(total) || total <= 0){
+  return;
+}
 
     /* =========================
        LEWATI DATA ERROR
