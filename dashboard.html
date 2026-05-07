@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
 body{
   font-family:Arial;
   background:#f2f2f2;
@@ -16,7 +17,7 @@ header{
   background:#0d6efd;
   color:#fff;
   text-align:center;
-  padding:15px;
+  padding:20px;
 }
 
 .tabs{
@@ -26,13 +27,14 @@ header{
 
 .tabs button{
   flex:1;
-  padding:10px;
+  padding:12px;
   border:none;
   margin:2px;
-  border-radius:6px;
+  border-radius:8px;
   background:#fff;
   color:#0d6efd;
   font-weight:bold;
+  font-size:16px;
 }
 
 .tabs button.active{
@@ -44,7 +46,7 @@ header{
   background:#fff;
   margin:10px;
   padding:15px;
-  border-radius:8px;
+  border-radius:10px;
   display:none;
 }
 
@@ -53,7 +55,7 @@ header{
 }
 
 .item{
-  padding:10px 0;
+  padding:12px 0;
   border-bottom:1px solid #ddd;
 }
 
@@ -61,6 +63,12 @@ header{
   font-size:18px;
   font-weight:bold;
 }
+
+.kecil{
+  color:#666;
+  font-size:14px;
+}
+
 </style>
 </head>
 
@@ -72,53 +80,73 @@ header{
 </header>
 
 <div class="tabs">
-  <button id="btnHarian" class="active" onclick="showTab('harian')">
+
+  <button
+    id="btnHarian"
+    class="active"
+    onclick="showTab('harian')">
+
     Harian
+
   </button>
 
-  <button id="btnBulanan" onclick="showTab('bulanan')">
+  <button
+    id="btnBulanan"
+    onclick="showTab('bulanan')">
+
     Bulanan
+
   </button>
 
-  <button id="btnTahunan" onclick="showTab('tahunan')">
+  <button
+    id="btnTahunan"
+    onclick="showTab('tahunan')">
+
     Tahunan
+
   </button>
+
 </div>
 
 <div id="harian" class="box active">
   <h3>📅 Harian (Bulan Ini)</h3>
-  <div id="harianList"></div>
+  <div id="harianList">Loading...</div>
 </div>
 
 <div id="bulanan" class="box">
   <h3>🗓️ Rekap Bulanan</h3>
-  <div id="bulananList"></div>
+  <div id="bulananList">Loading...</div>
 </div>
 
 <div id="tahunan" class="box">
   <h3>📆 Rekap Tahunan</h3>
-  <div id="tahunanList"></div>
+  <div id="tahunanList">Loading...</div>
 </div>
 
 <script>
 
+/* =========================
+   TAB
+========================= */
+
 function showTab(id){
 
-  document.querySelectorAll('.box')
-    .forEach(box => box.classList.remove('active'));
+  document.querySelectorAll(".box")
+    .forEach(el => el.classList.remove("active"));
 
-  document.querySelectorAll('.tabs button')
-    .forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll(".tabs button")
+    .forEach(el => el.classList.remove("active"));
 
-  document.getElementById(id).classList.add('active');
+  document.getElementById(id)
+    .classList.add("active");
 
   document.getElementById(
-    'btn' + id.charAt(0).toUpperCase() + id.slice(1)
-  ).classList.add('active');
+    "btn" + id.charAt(0).toUpperCase() + id.slice(1)
+  ).classList.add("active");
 }
 
 /* =========================
-   LINK CSV GOOGLE SHEET
+   LINK CSV
 ========================= */
 
 const CSV_URL =
@@ -130,11 +158,12 @@ const CSV_URL =
 
 fetch(CSV_URL)
 
-.then(res => res.text())
+.then(response => response.text())
 
 .then(csv => {
 
-  const rows = csv.trim().split("\n").slice(1);
+  const rows =
+    csv.trim().split("\n").slice(1);
 
   const now = new Date();
 
@@ -150,37 +179,79 @@ fetch(CSV_URL)
 
   rows.forEach(row => {
 
-    const c = row.split(",");
+    /* =========================
+       FIX CSV
+    ========================= */
 
-    const tanggal = (c[0] || "").trim();
-    const hari     = (c[1] || "").trim();
-    const bulan    = (c[2] || "").trim();
-    const tahun    = (c[3] || "").trim();
+    const c =
+      row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
-    /* TOTAL HARGA PENJUALAN KOLOM L */
+    if(!c) return;
+
+    const tanggal =
+      (c[0] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const hari =
+      (c[1] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const bulan =
+      (c[2] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const tahun =
+      (c[3] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    /* =========================
+       TOTAL KOLOM L
+    ========================= */
+
     const total =
       parseInt(
         (c[11] || "0")
         .replace(/"/g,"")
-        .replace(/\./g,"")
-        .replace(/,/g,"")
+        .replace(/[^\d]/g,"")
       ) || 0;
+
+    /* =========================
+       SKIP DATA ERROR
+    ========================= */
+
+    if(
+      bulan === "#REF!"
+      ||
+      tahun === "#REF!"
+    ){
+      return;
+    }
 
     /* =========================
        HARIAN
     ========================= */
 
     if(
-      bulan.toLowerCase() === bulanSekarang.toLowerCase()
+      bulan.toLowerCase()
+      ===
+      bulanSekarang.toLowerCase()
+
       &&
+
       tahun === tahunSekarang
     ){
 
       if(!harian[tanggal]){
+
         harian[tanggal] = {
           hari: hari,
           total: 0
         };
+
       }
 
       harian[tanggal].total += total;
@@ -209,12 +280,13 @@ fetch(CSV_URL)
   });
 
   /* =========================
-     TAMPILKAN HARIAN
+     HARIAN
   ========================= */
 
   let hHtml = "";
 
   Object.keys(harian)
+
     .sort((a,b)=>{
 
       const pa = a.split("/");
@@ -222,70 +294,102 @@ fetch(CSV_URL)
 
       return new Date(pa[2], pa[1]-1, pa[0]) -
              new Date(pb[2], pb[1]-1, pb[0]);
+
     })
 
     .forEach(tgl => {
 
       hHtml += `
+
       <div class="item">
-        ${tgl} ${harian[tgl].hari}<br>
-        <span class="total">
+
+        <div class="kecil">
+          ${tgl} ${harian[tgl].hari}
+        </div>
+
+        <div class="total">
           Rp ${harian[tgl].total.toLocaleString("id-ID")}
-        </span>
+        </div>
+
       </div>
+
       `;
+
     });
 
-  document.getElementById("harianList").innerHTML =
-    hHtml || "<p>Tidak ada data</p>";
+  document.getElementById("harianList")
+    .innerHTML =
+      hHtml || "<p>Tidak ada data</p>";
 
   /* =========================
-     TAMPILKAN BULANAN
+     BULANAN
   ========================= */
 
   let bHtml = "";
 
-  for(const bulan in bulanan){
+  Object.keys(bulanan)
 
-    bHtml += `
-    <div class="item">
-      ${bulan}<br>
-      <span class="total">
-        Rp ${bulanan[bulan].toLocaleString("id-ID")}
-      </span>
-    </div>
-    `;
-  }
+    .forEach(bulan => {
 
-  document.getElementById("bulananList").innerHTML = bHtml;
+      bHtml += `
+
+      <div class="item">
+
+        <div class="kecil">
+          ${bulan}
+        </div>
+
+        <div class="total">
+          Rp ${bulanan[bulan].toLocaleString("id-ID")}
+        </div>
+
+      </div>
+
+      `;
+
+    });
+
+  document.getElementById("bulananList")
+    .innerHTML = bHtml;
 
   /* =========================
-     TAMPILKAN TAHUNAN
+     TAHUNAN
   ========================= */
 
   let tHtml = "";
 
-  for(const tahun in tahunan){
+  Object.keys(tahunan)
 
-    tHtml += `
-    <div class="item">
-      ${tahun}<br>
-      <span class="total">
-        Rp ${tahunan[tahun].toLocaleString("id-ID")}
-      </span>
-    </div>
-    `;
-  }
+    .forEach(tahun => {
 
-  document.getElementById("tahunanList").innerHTML = tHtml;
+      tHtml += `
+
+      <div class="item">
+
+        <div class="kecil">
+          ${tahun}
+        </div>
+
+        <div class="total">
+          Rp ${tahunan[tahun].toLocaleString("id-ID")}
+        </div>
+
+      </div>
+
+      `;
+
+    });
+
+  document.getElementById("tahunanList")
+    .innerHTML = tHtml;
 
 })
 
-.catch(err => {
+.catch(error => {
 
-  alert("Gagal ambil data dari Sheet Fix Rumus1");
+  console.log(error);
 
-  console.error(err);
+  alert("Gagal mengambil data spreadsheet");
 
 });
 
