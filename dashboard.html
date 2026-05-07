@@ -2,36 +2,37 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Konter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Dashboard Konter</title>
 
 <style>
 
 body{
-  font-family:Arial;
-  background:#f2f2f2;
   margin:0;
+  font-family:Arial,sans-serif;
+  background:#f2f2f2;
 }
 
 header{
   background:#0d6efd;
-  color:#fff;
+  color:white;
   text-align:center;
   padding:20px;
 }
 
 .tabs{
   display:flex;
-  margin:10px;
+  gap:5px;
+  padding:10px;
 }
 
 .tabs button{
   flex:1;
-  padding:12px;
   border:none;
-  margin:2px;
+  padding:12px;
   border-radius:8px;
-  background:#fff;
+  background:white;
   color:#0d6efd;
   font-weight:bold;
   font-size:16px;
@@ -39,15 +40,15 @@ header{
 
 .tabs button.active{
   background:#0d6efd;
-  color:#fff;
+  color:white;
 }
 
 .box{
-  background:#fff;
+  display:none;
+  background:white;
   margin:10px;
   padding:15px;
   border-radius:10px;
-  display:none;
 }
 
 .box.active{
@@ -55,18 +56,18 @@ header{
 }
 
 .item{
-  padding:12px 0;
   border-bottom:1px solid #ddd;
+  padding:10px 0;
+}
+
+.nama{
+  font-size:14px;
+  color:#666;
 }
 
 .total{
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
-}
-
-.kecil{
-  color:#666;
-  font-size:14px;
 }
 
 </style>
@@ -76,14 +77,14 @@ header{
 
 <header>
   <h2>📊 Dashboard Konter</h2>
-  <small>Data diambil dari Sheet Fix Rumus1</small>
+  <small>Data dari Sheet Fix Rumus1</small>
 </header>
 
 <div class="tabs">
 
   <button
-    id="btnHarian"
     class="active"
+    id="btnHarian"
     onclick="showTab('harian')">
 
     Harian
@@ -109,17 +110,17 @@ header{
 </div>
 
 <div id="harian" class="box active">
-  <h3>📅 Harian (Bulan Ini)</h3>
+  <h3>📅 Data Harian</h3>
   <div id="harianList">Loading...</div>
 </div>
 
 <div id="bulanan" class="box">
-  <h3>🗓️ Rekap Bulanan</h3>
+  <h3>🗓️ Data Bulanan</h3>
   <div id="bulananList">Loading...</div>
 </div>
 
 <div id="tahunan" class="box">
-  <h3>📆 Rekap Tahunan</h3>
+  <h3>📆 Data Tahunan</h3>
   <div id="tahunanList">Loading...</div>
 </div>
 
@@ -131,18 +132,26 @@ header{
 
 function showTab(id){
 
-  document.querySelectorAll(".box")
-    .forEach(el => el.classList.remove("active"));
+  document
+    .querySelectorAll(".box")
+    .forEach(el=>el.classList.remove("active"));
 
-  document.querySelectorAll(".tabs button")
-    .forEach(el => el.classList.remove("active"));
+  document
+    .querySelectorAll(".tabs button")
+    .forEach(el=>el.classList.remove("active"));
 
-  document.getElementById(id)
+  document
+    .getElementById(id)
     .classList.add("active");
 
-  document.getElementById(
-    "btn" + id.charAt(0).toUpperCase() + id.slice(1)
-  ).classList.add("active");
+  document
+    .getElementById(
+      "btn" +
+      id.charAt(0).toUpperCase() +
+      id.slice(1)
+    )
+    .classList.add("active");
+
 }
 
 /* =========================
@@ -158,30 +167,18 @@ const CSV_URL =
 
 fetch(CSV_URL)
 
-.then(response => response.text())
+.then(res => res.text())
 
 .then(csv => {
 
   const rows =
     csv.trim().split("\n").slice(1);
 
-  const now = new Date();
-
-  const bulanSekarang =
-    now.toLocaleString("id-ID",{month:"long"});
-
-  const tahunSekarang =
-    now.getFullYear().toString();
-
   let harian = {};
   let bulanan = {};
   let tahunan = {};
 
   rows.forEach(row => {
-
-    /* =========================
-       FIX CSV
-    ========================= */
 
     const c =
       row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
@@ -208,10 +205,6 @@ fetch(CSV_URL)
       .replace(/"/g,"")
       .trim();
 
-    /* =========================
-       TOTAL KOLOM L
-    ========================= */
-
     const total =
       parseInt(
         (c[11] || "0")
@@ -220,49 +213,28 @@ fetch(CSV_URL)
       ) || 0;
 
     /* =========================
-       SKIP DATA ERROR
-    ========================= */
-
-    if(
-      bulan === "#REF!"
-      ||
-      tahun === "#REF!"
-    ){
-      return;
-    }
-
-    /* =========================
        HARIAN
     ========================= */
 
-    if(
-      bulan.toLowerCase()
-      ===
-      bulanSekarang.toLowerCase()
+    if(!harian[tanggal]){
 
-      &&
+      harian[tanggal] = {
+        hari: hari,
+        total: 0
+      };
 
-      tahun === tahunSekarang
-    ){
-
-      if(!harian[tanggal]){
-
-        harian[tanggal] = {
-          hari: hari,
-          total: 0
-        };
-
-      }
-
-      harian[tanggal].total += total;
     }
+
+    harian[tanggal].total += total;
 
     /* =========================
        BULANAN
     ========================= */
 
     if(!bulanan[bulan]){
+
       bulanan[bulan] = 0;
+
     }
 
     bulanan[bulan] += total;
@@ -272,7 +244,9 @@ fetch(CSV_URL)
     ========================= */
 
     if(!tahunan[tahun]){
+
       tahunan[tahun] = 0;
+
     }
 
     tahunan[tahun] += total;
@@ -280,116 +254,108 @@ fetch(CSV_URL)
   });
 
   /* =========================
-     HARIAN
+     TAMPILKAN HARIAN
   ========================= */
 
   let hHtml = "";
 
   Object.keys(harian)
 
-    .sort((a,b)=>{
+  .forEach(tgl => {
 
-      const pa = a.split("/");
-      const pb = b.split("/");
+    hHtml += `
 
-      return new Date(pa[2], pa[1]-1, pa[0]) -
-             new Date(pb[2], pb[1]-1, pb[0]);
+    <div class="item">
 
-    })
-
-    .forEach(tgl => {
-
-      hHtml += `
-
-      <div class="item">
-
-        <div class="kecil">
-          ${tgl} ${harian[tgl].hari}
-        </div>
-
-        <div class="total">
-          Rp ${harian[tgl].total.toLocaleString("id-ID")}
-        </div>
-
+      <div class="nama">
+        ${tgl} ${harian[tgl].hari}
       </div>
 
-      `;
+      <div class="total">
+        Rp ${harian[tgl].total.toLocaleString("id-ID")}
+      </div>
 
-    });
+    </div>
 
-  document.getElementById("harianList")
-    .innerHTML =
-      hHtml || "<p>Tidak ada data</p>";
+    `;
+
+  });
+
+  document
+    .getElementById("harianList")
+    .innerHTML = hHtml;
 
   /* =========================
-     BULANAN
+     TAMPILKAN BULANAN
   ========================= */
 
   let bHtml = "";
 
   Object.keys(bulanan)
 
-    .forEach(bulan => {
+  .forEach(bulan => {
 
-      bHtml += `
+    bHtml += `
 
-      <div class="item">
+    <div class="item">
 
-        <div class="kecil">
-          ${bulan}
-        </div>
-
-        <div class="total">
-          Rp ${bulanan[bulan].toLocaleString("id-ID")}
-        </div>
-
+      <div class="nama">
+        ${bulan}
       </div>
 
-      `;
+      <div class="total">
+        Rp ${bulanan[bulan].toLocaleString("id-ID")}
+      </div>
 
-    });
+    </div>
 
-  document.getElementById("bulananList")
+    `;
+
+  });
+
+  document
+    .getElementById("bulananList")
     .innerHTML = bHtml;
 
   /* =========================
-     TAHUNAN
+     TAMPILKAN TAHUNAN
   ========================= */
 
   let tHtml = "";
 
   Object.keys(tahunan)
 
-    .forEach(tahun => {
+  .forEach(tahun => {
 
-      tHtml += `
+    tHtml += `
 
-      <div class="item">
+    <div class="item">
 
-        <div class="kecil">
-          ${tahun}
-        </div>
-
-        <div class="total">
-          Rp ${tahunan[tahun].toLocaleString("id-ID")}
-        </div>
-
+      <div class="nama">
+        ${tahun}
       </div>
 
-      `;
+      <div class="total">
+        Rp ${tahunan[tahun].toLocaleString("id-ID")}
+      </div>
 
-    });
+    </div>
 
-  document.getElementById("tahunanList")
+    `;
+
+  });
+
+  document
+    .getElementById("tahunanList")
     .innerHTML = tHtml;
 
 })
 
 .catch(error => {
 
-  console.log(error);
+  alert("Gagal mengambil data");
 
-  alert("Gagal mengambil data spreadsheet");
+  console.log(error);
 
 });
 
