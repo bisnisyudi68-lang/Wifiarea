@@ -6,7 +6,411 @@
 
 <title>Dashboard Konter</title>
 
+<style><!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Konter</title>
+
 <style>
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f2f2f2;
+}
+
+header{
+  background:#0d6efd;
+  color:white;
+  text-align:center;
+  padding:25px 15px;
+}
+
+header h1{
+  margin:0;
+  font-size:34px;
+}
+
+header p{
+  margin-top:10px;
+  font-size:18px;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:15px;
+}
+
+.tabs button{
+  flex:1;
+  border:none;
+  padding:14px;
+  border-radius:12px;
+  background:white;
+  color:#0d6efd;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#0d6efd;
+  color:white;
+}
+
+.box{
+  display:none;
+  background:white;
+  margin:15px;
+  padding:20px;
+  border-radius:16px;
+}
+
+.box.active{
+  display:block;
+}
+
+.item{
+  border-bottom:1px solid #ddd;
+  padding:18px 0;
+}
+
+.tgl{
+  font-size:15px;
+  color:#666;
+}
+
+.total{
+  font-size:28px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📊 Dashboard Konter</h1>
+  <p>Data dari Sheet HARIAN / BULANAN / TAHUNAN</p>
+</header>
+
+<div class="tabs">
+
+  <button
+    id="btnHarian"
+    class="active"
+    onclick="showTab('harian')">
+
+    Harian
+
+  </button>
+
+  <button
+    id="btnBulanan"
+    onclick="showTab('bulanan')">
+
+    Bulanan
+
+  </button>
+
+  <button
+    id="btnTahunan"
+    onclick="showTab('tahunan')">
+
+    Tahunan
+
+  </button>
+
+</div>
+
+<!-- HARIAN -->
+
+<div id="harian" class="box active">
+
+  <h2>📅 Data Harian</h2>
+
+  <div id="harianList">
+    Loading...
+  </div>
+
+</div>
+
+<!-- BULANAN -->
+
+<div id="bulanan" class="box">
+
+  <h2>🗓️ Data Bulanan</h2>
+
+  <div id="bulananList">
+    Loading...
+  </div>
+
+</div>
+
+<!-- TAHUNAN -->
+
+<div id="tahunan" class="box">
+
+  <h2>📆 Data Tahunan</h2>
+
+  <div id="tahunanList">
+    Loading...
+  </div>
+
+</div>
+
+<script>
+
+/* =========================
+   TAB
+========================= */
+
+function showTab(id){
+
+  document
+    .querySelectorAll(".box")
+    .forEach(el=>{
+      el.classList.remove("active");
+    });
+
+  document
+    .querySelectorAll(".tabs button")
+    .forEach(el=>{
+      el.classList.remove("active");
+    });
+
+  document
+    .getElementById(id)
+    .classList.add("active");
+
+  document
+    .getElementById(
+      "btn" +
+      id.charAt(0).toUpperCase() +
+      id.slice(1)
+    )
+    .classList.add("active");
+}
+
+/* =========================
+   CSV LINK
+========================= */
+
+/* SHEET HARIAN */
+const HARIAN_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=1976729696&single=true&output=csv";
+
+/* SHEET BULANAN */
+const BULANAN_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=820490667&single=true&output=csv";
+
+/* SHEET TAHUNAN */
+const TAHUNAN_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=1659517887&single=true&output=csv";
+
+/* =========================
+   FORMAT RUPIAH
+========================= */
+
+function rupiah(angka){
+
+  return "Rp " +
+    Number(angka)
+    .toLocaleString("id-ID");
+
+}
+
+/* =========================
+   LOAD HARIAN
+========================= */
+
+fetch(HARIAN_URL)
+
+.then(res=>res.text())
+
+.then(csv=>{
+
+  const rows =
+    csv.trim().split("\n").slice(1);
+
+  let html = "";
+
+  rows.forEach(row=>{
+
+    const c =
+      row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+    if(!c) return;
+
+    const tanggal =
+      (c[0] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const total =
+      (c[4] || "")
+      .replace(/"/g,"")
+      .replace(/[Rp.\s]/g,"")
+      .replace(/,/g,"");
+
+    if(!tanggal || !total) return;
+
+    html += `
+
+      <div class="item">
+
+        <div class="tgl">
+          ${tanggal}
+        </div>
+
+        <div class="total">
+          ${rupiah(total)}
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  document
+    .getElementById("harianList")
+    .innerHTML = html;
+
+});
+
+/* =========================
+   LOAD BULANAN
+========================= */
+
+fetch(BULANAN_URL)
+
+.then(res=>res.text())
+
+.then(csv=>{
+
+  const rows =
+    csv.trim().split("\n").slice(1);
+
+  let html = "";
+
+  rows.forEach(row=>{
+
+    const c =
+      row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+    if(!c) return;
+
+    const bulan =
+      (c[0] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const tahun =
+      (c[1] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const total =
+      (c[2] || "")
+      .replace(/"/g,"")
+      .replace(/[Rp.\s]/g,"")
+      .replace(/,/g,"");
+
+    if(!bulan || !tahun || !total) return;
+
+    html += `
+
+      <div class="item">
+
+        <div class="tgl">
+          ${bulan} ${tahun}
+        </div>
+
+        <div class="total">
+          ${rupiah(total)}
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  document
+    .getElementById("bulananList")
+    .innerHTML = html;
+
+});
+
+/* =========================
+   LOAD TAHUNAN
+========================= */
+
+fetch(TAHUNAN_URL)
+
+.then(res=>res.text())
+
+.then(csv=>{
+
+  const rows =
+    csv.trim().split("\n").slice(1);
+
+  let html = "";
+
+  rows.forEach(row=>{
+
+    const c =
+      row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+    if(!c) return;
+
+    const tahun =
+      (c[0] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const total =
+      (c[1] || "")
+      .replace(/"/g,"")
+      .replace(/[Rp.\s]/g,"")
+      .replace(/,/g,"");
+
+    if(!tahun || !total) return;
+
+    html += `
+
+      <div class="item">
+
+        <div class="tgl">
+          ${tahun}
+        </div>
+
+        <div class="total">
+          ${rupiah(total)}
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  document
+    .getElementById("tahunanList")
+    .innerHTML = html;
+
+});
+
+</script>
+
+</body>
+</html>
 
 body{
   margin:0;
