@@ -112,14 +112,62 @@ input[type=date]{
   font-weight:bold;
   margin-top:5px;
 }
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#f4f6f9;
+}
 
+.tabs button{
+  flex:1;
+  border:none;
+  padding:12px;
+  border-radius:12px;
+  background:white;
+  color:#0d6efd;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#0d6efd;
+  color:white;
+}
+.box{
+  display:none;
+  height:65vh;
+  overflow-y:auto;
+  padding-bottom:20px;
+}
+
+.box.active{
+  display:block;
+}
+.sticky-menu{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#f2f2f2;
+  padding:10px 0;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:0 10px;
+}
 </style>
 </head>
+
 <header>
 <h2>A-Yudi-Thea</h2>
 <p>Dashboard & Stok Produk</p>
 </header>
 <body>
+
 <!-- DASHBOARD -->
 <h3>📅 Data Harian</h3>
 <input type="date" id="tgl" onchange="filterTanggal()">
@@ -128,8 +176,7 @@ input[type=date]{
 <div class="card">Pengeluaran<div class="big" id="keluar">Rp 0</div></div>
 <div class="card">Laba<div class="big" id="laba">Rp 0</div></div>
 
-<hr>
-
+<div class="sticky-menu">
 
 <div class="tabs">
 
@@ -151,6 +198,8 @@ input[type=date]{
     onclick="showTab('tahunan')">
     Tahunan
   </button>
+
+</div>
 
 </div>
 
