@@ -271,6 +271,36 @@ fetch(CSV_URL)
   console.error(err);
 
 });
+const sheetId="1iPbtRGldW5yz6tuUZ5oHzMGsnNb4cHyCbAEMkq51qK4";
+const tabLaporan="FIX RUMUS1";
+
+fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encodeURIComponent(tabLaporan)}`)
+.then(r=>r.text())
+.then(t=>{
+const json=JSON.parse(t.substring(47).slice(0,-2));
+window.rowsLaporan=json.table.rows;
+});
+
+function filterTanggal(){
+let pilih=tgl.value;
+let om=0, ke=0;
+
+rowsLaporan.forEach(r=>{
+let d=r.c[0]?.f||r.c[0]?.v||"";
+if(d.includes("/")){
+let p=d.split("/");
+d=`${p[2]}-${p[1]}-${p[0]}`;
+}
+if(d===pilih){
+om+=Number(r.c[11]?.v||0);
+ke+=Number(r.c[12]?.v||0);
+}
+});
+
+omset.innerText="Rp "+om;
+keluar.innerText="Rp "+ke;
+laba.innerText="Rp "+(om-ke);
+}
 
 </script>
 
