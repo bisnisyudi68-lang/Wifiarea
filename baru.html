@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Konter</title>
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f2f2f2;
+}
+
+header{
+  background:#0d6efd;
+  color:white;
+  text-align:center;
+  padding:25px;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:15px;
+}
+
+.tabs button{
+  flex:1;
+  border:none;
+  padding:14px;
+  border-radius:12px;
+  background:white;
+  color:#0d6efd;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#0d6efd;
+  color:white;
+}
+
+.box{
+  display:none;
+  background:white;
+  margin:15px;
+  padding:20px;
+  border-radius:16px;
+}
+
+.box.active{
+  display:block;
+}
+
+.item{
+  border-bottom:1px solid #ddd;
+  padding:18px 0;
+}
+
+.tgl{
+  color:#666;
+  font-size:15px;
+}
+
+.total{
+  font-size:28px;
+  font-weight:bold;
+  margin-top:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📊 Dashboard Konter</h1>
+  <p>Data dari Sheet FIX RUMUS1</p>
+</header>
+
+<div class="tabs">
+
+  <button
+    class="active"
+    id="btnHarian"
+    onclick="showTab('harian')">
+    Harian
+  </button>
+
+  <button
+    id="btnBulanan"
+    onclick="showTab('bulanan')">
+    Bulanan
+  </button>
+
+  <button
+    id="btnTahunan"
+    onclick="showTab('tahunan')">
+    Tahunan
+  </button>
+
+</div>
+
+<div id="harian" class="box active">
+  <h2>📅 Data Harian</h2>
+  <div id="harianList">Loading...</div>
+</div>
+
+<div id="bulanan" class="box">
+  <h2>🗓️ Data Bulanan</h2>
+  <div id="bulananList">Loading...</div>
+</div>
+
+<div id="tahunan" class="box">
+  <h2>📆 Data Tahunan</h2>
+  <div id="tahunanList">Loading...</div>
+</div>
+
+<script>
+
+function showTab(id){
+
+  document.querySelectorAll(".box").forEach(el=>{
+    el.classList.remove("active");
+  });
+
+  document.querySelectorAll(".tabs button").forEach(el=>{
+    el.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  document.getElementById(
+    "btn" +
+    id.charAt(0).toUpperCase() +
+    id.slice(1)
+  ).classList.add("active");
+}
+
+const CSV_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=1848020631&single=true&output=csv";
+
+function rupiah(angka){
+  return "Rp " + angka.toLocaleString("id-ID");
+}
+
+fetch(CSV_URL)
+.then(res => res.text())
+.then(csv => {
+
+  const lines = csv.trim().split("\n");
+
+  const headers = lines[0]
+    .split(",")
+    .map(h => h.replace(/"/g,"").trim().toUpperCase());
+
+  const idxTanggal = headers.indexOf("TANGGAL");
+  const idxBulan   = headers.indexOf("BULAN");
+  const idxTahun   = headers.indexOf("TAHUN");
+  const idxTotal   = headers.indexOf("TOTAL HARGA");
+
+  let harian = {};
+  let bulanan = {};
+  let tahunan = {};
+
+  lines.slice(1).forEach(row => {
+
+    const c = row.split(",");
+
+    const tanggal =
+      (c[idxTanggal] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const bulan =
+      (c[idxBulan] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const tahun =
+      (c[idxTahun] || "")
+      .replace(/"/g,"")
+      .trim();
+
+    const total =
+      parseInt(
+        (c[idxTotal] || "")
+        .replace(/"/g,"")
+        .replace(/[^\d]/g,"")
+      ) || 0;
+
+    if(!tanggal || total <= 0) return;
+
+    harian[tanggal] =
+      (harian[tanggal] || 0) + total;
+
+    const namaBulan =
+      bulan + " " + tahun;
+
+    bulanan[namaBulan] =
+      (bulanan[namaBulan] || 0) + total;
+
+    tahunan[tahun] =
+      (tahunan[tahun] || 0) + total;
+
+  });
+
+  let hHtml = "";
+
+  Object.keys(harian).forEach(tgl => {
+
+    hHtml += `
+      <div class="item">
+        <div class="tgl">${tgl}</div>
+        <div class="total">${rupiah(harian[tgl])}</div>
+      </div>
+    `;
+
+  });
+
+  document.getElementById("harianList").innerHTML = hHtml;
+
+  let bHtml = "";
+
+  Object.keys(bulanan).forEach(bln => {
+
+    bHtml += `
+      <div class="item">
+        <div class="tgl">${bln}</div>
+        <div class="total">${rupiah(bulanan[bln])}</div>
+      </div>
+    `;
+
+  });
+
+  document.getElementById("bulananList").innerHTML = bHtml;
+
+  let tHtml = "";
+
+  Object.keys(tahunan).forEach(thn => {
+
+    tHtml += `
+      <div class="item">
+        <div class="tgl">${thn}</div>
+        <div class="total">${rupiah(tahunan[thn])}</div>
+      </div>
+    `;
+
+  });
+
+  document.getElementById("tahunanList").innerHTML = tHtml;
+
+})
+.catch(err => {
+
+  document.getElementById("harianList").innerHTML =
+    "Gagal memuat data";
+
+  console.error(err);
+
+});
+
+</script>
+
+</body>
+</html>
