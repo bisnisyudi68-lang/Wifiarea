@@ -8,81 +8,147 @@
 
 <style>
 
-.summary{
-display:grid;
-gap:15px;
-margin-top:20px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-.card{
-background:white;
-border-radius:24px;
-padding:25px;
-box-shadow:0 3px 10px rgba(0,0,0,.05);
+body{
+  background:#f4f6f9;
+  font-family:'Segoe UI',sans-serif;
+  color:#222;
 }
 
-.card-title{
-font-size:18px;
-color:#333;
-margin-bottom:15px;
+header{
+  background:#0d6efd;
+  color:white;
+  text-align:center;
+  padding:30px 20px;
+  border-radius:0 0 25px 25px;
 }
 
-.big{
-font-size:42px;
-font-weight:700;
-color:#000;
+header h1,
+header h2{
+  font-size:32px;
+  margin-bottom:8px;
 }
 
-.tabs{
-display:flex;
-gap:15px;
-margin-top:20px;
+header p{
+  opacity:.9;
 }
 
-.tabs button{
-flex:1;
-border:none;
-padding:20px;
-border-radius:22px;
-background:white;
-color:#0d6efd;
-font-size:18px;
-font-weight:bold;
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-
-.tabs button.active{
-background:#0d6efd;
-color:white;
-}
-
-.box{
-margin-top:20px;
-}
-
-.item{
-background:white;
-border-radius:24px;
-padding:25px;
-margin-bottom:15px;
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-
-.tgl{
-font-size:16px;
-color:#777;
-margin-bottom:10px;
-}
-
-.total{
-font-size:36px;
-font-weight:bold;
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
 }
 
 h2{
-font-size:28px;
-margin:20px 0;
+  margin:20px 0;
 }
+
+input[type="date"]{
+  width:100%;
+  padding:15px;
+  border:1px solid #ddd;
+  border-radius:15px;
+  background:white;
+  font-size:16px;
+  margin-bottom:20px;
+}
+
+.summary{
+  display:grid;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.card-title{
+  font-size:18px;
+  color:#666;
+}
+
+.big{
+  font-size:48px;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.tabs{
+  display:flex;
+  gap:15px;
+  margin:25px 0;
+}
+
+.tabs button{
+  flex:1;
+  border:none;
+  background:white;
+  color:#0d6efd;
+  padding:18px;
+  border-radius:18px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+.tabs button.active{
+  background:#0d6efd;
+  color:white;
+}
+
+.box{
+  display:none;
+}
+
+.box.active{
+  display:block;
+}
+
+.item{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.tgl{
+  color:#888;
+  font-size:15px;
+  margin-bottom:8px;
+}
+
+.total{
+  font-size:42px;
+  font-weight:700;
+}
+
+@media (min-width:768px){
+
+  .summary{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .big{
+    font-size:36px;
+  }
+
+  .total{
+    font-size:32px;
+  }
+
+}
+
 </style>
 </head>
 
